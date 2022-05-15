@@ -1,4 +1,5 @@
 import sqlite3
+import const
 
 class DataBase:
     def __init__(self, name):
@@ -7,16 +8,12 @@ class DataBase:
         self.__create()
 
     def __create(self):
-        self.transactions("""
-        CREATE TABLE IF NOT EXISTS chat(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        chat_id INTEGER NOT NULL,
-        name TEXT,
-        class TEXT NOT NULL,
-        phone INTEGER,
-        tag TEXT,
-        status TEXT NOT NULL);""")
+        self.transactions(const.CHANNEL_DB)
 
     def transactions(self, requests):
         self.cursor.execute(requests)
+        self.db.commit()
+
+    def defender_transaction(self, requests, *args):
+        self.cursor.executemany(requests, [args])
         self.db.commit()
