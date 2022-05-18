@@ -6,6 +6,8 @@ from datebase import DataBase
 from const import *
 from pytz import timezone
 import time
+import io
+import AudioDownloader
 
 zone = timezone('Europe/Kiev')
 db = DataBase(name=DB_NAME)
@@ -123,6 +125,12 @@ async def new_chat(client, chat_id):
             return
     return
 
+async def get_text(client, message):
+    buf = io.BytesIO()
+    await client.download_media(message=message, file=buf)
+    buf.seek(0)
+    return AudioDownloader.audio_to_text(buf)
+
 async def new_message(event, client):
     chat_id = event.chat_id
     db.transactions(DETECTED.format(chat_id))
@@ -136,10 +144,10 @@ async def new_message(event, client):
         return
     id_ = res[0]
     author, author_id, real_author, real_author_id = await get_member(event, client)
-    text_message = event.message.text
+    type_ = await type_message(event.message)
+    text_message = event.message.text if type_ != 'VoiceMessage' else await get_text(client, event.message)
     date = time.mktime(event.message.date.astimezone(zone).timetuple())
     id_stack = event.message.grouped_id
-    type_ = await type_message(event.message)
     message = LOAD_FILE.get(type_)
     note = (author, author_id, real_author, real_author_id, text_message, message, date, id_stack, type_, 0)
 
