@@ -9,6 +9,7 @@ class DataBase:
 
     def __create(self):
         self.transactions(const.CHANNEL_DB)
+        self.transactions(const.CREATE_AUTHOR)
 
     def transactions(self, requests):
         self.cursor.execute(requests)

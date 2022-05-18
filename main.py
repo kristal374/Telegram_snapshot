@@ -19,8 +19,14 @@ def authorization() -> TelegramClient:
 async def loop():
     await chat_update(client)
 
+client = authorization()
+
+@client.on(events.NewMessage())
+async def normal_handler(event):
+    await new_message(event, client)
 
 if __name__ == '__main__':
-    client = authorization()
+
     with client:
         client.loop.run_until_complete(loop())
+        client.run_until_disconnected()
