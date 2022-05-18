@@ -1,11 +1,13 @@
+LOAD_FILE = {'File': False, 'Video': False, 'Photo': False}
+
 DB_NAME = 'Telegram.db'
 COLUMN = ["id", "chat_id", "name", "class", "phone", "tag", "status", "active"]
 ENTRY_CHECK = "SELECT * FROM chat WHERE chat_id = {}"
-ADD_NOTE_CHAT = "INSERT INTO chat(chat_id, name, class, phone, tag, status, active) VALUES (?, ?, ?, ?, ?, ?, ?);"
+ADD_NOTE_CHAT = "INSERT INTO chat(chat_id, name, class, phone, tag, status, active) VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT DO NOTHING;"
 CHANNEL_DB = """
 CREATE TABLE IF NOT EXISTS chat(
 id INTEGER PRIMARY KEY AUTOINCREMENT,
-chat_id INTEGER NOT NULL,
+chat_id INTEGER UNIQUE NOT NULL,
 name TEXT,
 class TEXT NOT NULL,
 phone INTEGER,
@@ -26,7 +28,11 @@ text_message TEXT,
 message BLOB,
 time TIME NOT NULL,
 id_stack INTEGER,
-type TEXT NOT NULL);"""
+type TEXT NOT NULL,
+deleted INTEGER NOT NULL);"""
+ADD_CHAT_MESSAGE = """
+INSERT INTO chat_log_{}(author, author_id, real_author, real_author_id, text_message, message, time, id_stack, type, deleted) 
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"""
 CREATE_AUTHOR = """
 CREATE TABLE IF NOT EXISTS author(
 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -36,3 +42,5 @@ class TEXT NOT NULL);
 """
 ADD_AUTHOR = "INSERT INTO author(name, author_id, class) VALUES (?, ?, ?)"
 SELECT_AUTHOR = "SELECT name FROM author WHERE author_id={};"
+DETECTED = "SELECT id, active FROM chat WHERE chat_id={}"
+SEARCH_TABLE = "SELECT * FROM sqlite_master WHERE  name='chat_log_{}';"

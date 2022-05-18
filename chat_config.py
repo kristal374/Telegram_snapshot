@@ -4,7 +4,10 @@ from telethon.tl.types import DocumentAttributeAudio, DocumentAttributeImageSize
     MessageMediaDocument, MessageMediaGeo
 from datebase import DataBase
 from const import *
+from pytz import timezone
+import time
 
+zone = timezone('Europe/Kiev')
 db = DataBase(name=DB_NAME)
 
 def info(dialog):
@@ -32,14 +35,12 @@ async def chat_update(client):
         if not chat:
             db.defender_transaction(ADD_NOTE_CHAT, *config)
         elif config[:-2:] != chat[1:-2:]:
-            print('err')
             ID = chat[0]
             db.defender_transaction(UPDATE_NOTE.format(ID), *config[1:-1:])
     db.transactions(GET_CHANNEL_ID)
     for id_ in db.cursor.fetchmany(0):
         if id_[0] not in channel_id:
             db.transactions(UPDATE_STATUS.format(id_[0]))
-
 
 async def get_member(event, client):
     async def get_name(ID):
@@ -115,14 +116,34 @@ async def type_message(message):
         type_mes = 'ErrorTypeFile'
     return type_mes
 
+async def new_chat(client, chat_id):
+    async for dialog in client.iter_dialogs():
+        if dialog.id == chat_id:
+            db.defender_transaction(ADD_NOTE_CHAT, *info(dialog))
+            return
+    return
 
 async def new_message(event, client):
     chat_id = event.chat_id
-    db.transactions("SELECT active FROM chat WHERE chat_id={}".format(chat_id))
-    tracking = db.cursor.fetchone()[0]
-    print(await get_member(event, client))
-    print(await type_message(event.message))
-    if tracking:
-        print(event.message.to_dict()['message'])
-    # else:
-    #     print(event.message.to_dict()['message'])
+    db.transactions(DETECTED.format(chat_id))
+
+    res = db.cursor.fetchone()
+    if res is None:
+        await new_chat(client, chat_id)
+        db.transactions(DETECTED.format(chat_id))
+        res = db.cursor.fetchone()
+    elif res is not None and not res[1]:
+        return
+    id_ = res[0]
+    author, author_id, real_author, real_author_id = await get_member(event, client)
+    text_message = event.message.text
+    date = time.mktime(event.message.date.astimezone(zone).timetuple())
+    id_stack = event.message.grouped_id
+    type_ = await type_message(event.message)
+    message = LOAD_FILE.get(type_)
+    note = (author, author_id, real_author, real_author_id, text_message, message, date, id_stack, type_, 0)
+
+    db.transactions(DETECTED.format(id_))
+    if not db.cursor.fetchone():
+        db.transactions(CREATE_CHAT_LOG.format(id_))
+    db.defender_transaction(ADD_CHAT_MESSAGE.format(id_), *note)
