@@ -15,6 +15,7 @@ TYPE_PDF = 'PDF'
 TYPE_VIDEO_FILE = 'VideoFile'
 TYPE_FILE = 'File'
 TYPE_TEXT = 'Text'
+TYPE_DICE = 'DICE'
 TYPE_UNSUPPORTED = 'MessageMediaUnsupported'
 TYPE_ERROR_MESSAGE = 'ErrorTypeFile'
 

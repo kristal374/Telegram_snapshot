@@ -1,6 +1,6 @@
 from telethon.tl.types import DocumentAttributeAudio, DocumentAttributeImageSize, DocumentAttributeFilename, \
     DocumentAttributeSticker, MessageMediaContact, MessageMediaWebPage, MessageActionPhoneCall, MessageMediaPhoto, \
-    MessageMediaDocument, MessageMediaGeo, MessageMediaPoll, MessageMediaUnsupported
+    MessageMediaDocument, MessageMediaGeo, MessageMediaPoll, MessageMediaUnsupported, MessageMediaDice
 from datebase import DataBase
 from const import *
 from pytz import timezone
@@ -137,6 +137,8 @@ async def type_message(message):
         type_mes = TYPE_Poll
     elif isinstance(message.media, MessageMediaUnsupported):
         type_mes = TYPE_UNSUPPORTED
+    elif isinstance(message.media, MessageMediaDice):
+        type_mes = TYPE_DICE
     elif isinstance(message.media, MessageMediaDocument) and message.video is not None:  # video
         if message.video.attributes[0].round_message is True:
             type_mes = TYPE_CIRCULAR_VIDEO
