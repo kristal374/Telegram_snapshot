@@ -1,4 +1,3 @@
-import telethon
 from telethon.tl.types import DocumentAttributeAudio, DocumentAttributeImageSize, DocumentAttributeFilename, \
     DocumentAttributeSticker, MessageMediaContact, MessageMediaWebPage, MessageActionPhoneCall, MessageMediaPhoto, \
     MessageMediaDocument, MessageMediaGeo
@@ -44,7 +43,45 @@ async def chat_update(client):
         if id_[0] not in channel_id:
             db.transactions(UPDATE_STATUS.format(id_[0]))
 
-async def get_member(event, client):
+async def update_chat_log(client):
+    pass
+
+async def all_message(client, chat):
+    id_ = exist_chat(chat)[0]
+    if not exist_chat(id_):
+        db.transactions(CREATE_CHAT_LOG.format(id_))
+
+    cursor = db.cursor_transactions(ALL_MESSAGE.format(id_))
+    async for message in client.iter_messages(chat, reverse=True):
+        for row in cursor:
+            id_bd, mes_id, mes_text, type_ = row
+            mes_db = (mes_id, mes_text)
+            mes_ch = (message.id, message.text if message.text else None)
+            if mes_db[0] == mes_ch[0]:
+                if mes_db[1] != mes_ch[1] and type_ != 'VoiceMessage':
+                    db.transactions(MESSAGE_UPDATE.format(id_, mes_ch[1], id_bd))
+                break
+            else:
+                db.transactions(MESSAGE_DELETE.format(id_, id_bd))
+        else:
+            await add_message(client, message, chat)
+    else:
+        for row in cursor:
+            id_bd, *_ = row
+            db.transactions(MESSAGE_DELETE.format(id_, id_bd))
+
+async def add_message(client, message, chat, config=None):
+    res = exist_chat(chat)
+    if res is None:
+        await new_chat(client, chat)
+        res = exist_chat(chat)
+    elif res is not None and not res[1]:
+        return
+    id_ = res[0]
+    configure = await config_message(client, message) if not config else config
+    log_message_add(id_, configure)
+
+async def get_member(message, client):
     async def get_name(ID):
         if not ID:
             return None
@@ -54,14 +91,15 @@ async def get_member(event, client):
             try:
                 name = (await client.get_entity(ID))
                 name = f"{name.first_name} {name.last_name if name.last_name else ''}".strip()
-            except:
+            except AttributeError:
                 name = (await client.get_entity(ID)).title
-            class_ = {event.is_channel: "channel", event.is_group: "group", event.is_private: "user"}[True]
+            except:
+                name = 'UNEXPECTED_ERROR'
+            class_ = {message.is_channel: "channel", message.is_group: "group", message.is_private: "user"}[True]
             db.defender_transaction(ADD_AUTHOR, name, ID, class_)
             return name
         return name[0]
 
-    message = event.message
     sender_id = message.sender_id  # id user which send message
     real_sender_id = None
     real_sender_name = None
@@ -131,27 +169,28 @@ async def get_text(client, message):
     buf.seek(0)
     return AudioDownloader.audio_to_text(buf)
 
-async def new_message(event, client):
-    chat_id = event.chat_id
-    db.transactions(DETECTED.format(chat_id))
-
-    res = db.cursor.fetchone()
-    if res is None:
-        await new_chat(client, chat_id)
-        db.transactions(DETECTED.format(chat_id))
-        res = db.cursor.fetchone()
-    elif res is not None and not res[1]:
-        return
-    id_ = res[0]
-    author, author_id, real_author, real_author_id = await get_member(event, client)
-    type_ = await type_message(event.message)
-    text_message = event.message.text if type_ != 'VoiceMessage' else await get_text(client, event.message)
-    date = time.mktime(event.message.date.astimezone(zone).timetuple())
-    id_stack = event.message.grouped_id
+async def config_message(client, message):  # config message
+    message_id = message.id
+    author, author_id, real_author, real_author_id = await get_member(message, client)
+    type_ = await type_message(message)
+    text_message = message.text if type_ != 'VoiceMessage' else await get_text(client, message)
+    text_message = text_message if text_message != '' else None
+    date = time.mktime(message.date.astimezone(zone).timetuple())
+    id_stack = message.grouped_id
     message = LOAD_FILE.get(type_)
-    note = (author, author_id, real_author, real_author_id, text_message, message, date, id_stack, type_, 0)
+    note = (message_id, author, author_id, real_author, real_author_id, text_message, message, date, id_stack, type_, 0, 0, None)
+    return note
 
-    db.transactions(DETECTED.format(id_))
-    if not db.cursor.fetchone():
+def exist_chat(chat_id):  # test on life log_chat
+    db.transactions(DETECTED.format(chat_id))
+    return db.cursor.fetchone()
+
+def log_message_add(id_, conf):  # add message configuration in db chat
+    if not exist_chat(id_):
         db.transactions(CREATE_CHAT_LOG.format(id_))
-    db.defender_transaction(ADD_CHAT_MESSAGE.format(id_), *note)
+    db.defender_transaction(ADD_CHAT_MESSAGE.format(id_), *conf)
+
+
+async def new_message_event(event, client):
+    await add_message(client, event.message, event.chat_id)
+
