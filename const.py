@@ -1,5 +1,23 @@
 LOAD_FILE = {'File': False, 'Video': False, 'Photo': False}
 
+TYPE_PHOTO = 'Photo'
+TYPE_LINK = 'Link'
+TYPE_PHONE_CALL = 'PhoneCall'
+TYPE_GEO = 'GeoPosition'
+TYPE_CONTACT = 'Contact'
+TYPE_CIRCULAR_VIDEO = "CircularVideo"
+TYPE_VIDEO = 'Video'
+TYPE_GIF = "GIF"
+TYPE_MUSIC = "Music"
+TYPE_VOICE_MES = "VoiceMessage"
+TYPE_STICKER = 'Sticker'
+TYPE_PHOTO_FILE = 'PhotoFile'
+TYPE_PDF = 'PDF'
+TYPE_VIDEO_FILE = 'VideoFile'
+TYPE_FILE = 'File'
+TYPE_TEXT = 'Text'
+TYPE_ERROR_FILE = 'ErrorTypeFile'
+
 DB_NAME = 'Telegram.db'
 COLUMN = ["id", "chat_id", "name", "class", "phone", "tag", "status", "active"]
 ENTRY_CHECK = "SELECT * FROM chat WHERE chat_id = {}"

@@ -115,45 +115,45 @@ async def get_member(message, client):
 async def type_message(message):
     type_mes = None
     if isinstance(message.media, MessageMediaPhoto):
-        type_mes = 'Photo'
+        type_mes = TYPE_PHOTO
     elif isinstance(message.media, MessageMediaWebPage):
-        type_mes = 'Link'
+        type_mes = TYPE_LINK
     elif isinstance(message.action, MessageActionPhoneCall):
-        type_mes = 'PhoneCall'
+        type_mes = TYPE_PHONE_CALL
     elif isinstance(message.media, MessageMediaGeo):
-        type_mes = 'GeoPosition'
+        type_mes = TYPE_GEO
     elif isinstance(message.media, MessageMediaContact):
-        type_mes = 'Contact'
+        type_mes = TYPE_CONTACT
     elif isinstance(message.media, MessageMediaDocument) and message.video is not None:  # video
         if message.video.attributes[0].round_message is True:
-            type_mes = "CircularVideo"
+            type_mes = TYPE_CIRCULAR_VIDEO
         elif len(message.video.attributes) in (1, 2):
-            type_mes = 'Video'
+            type_mes = TYPE_VIDEO
         elif len(message.video.attributes) == 3:
-            type_mes = "GIF"
+            type_mes = TYPE_GIF
     elif message.media is not None:
         if isinstance(message.media.document.attributes[0], DocumentAttributeAudio):
             if len(message.media.document.attributes) == 2:
-                type_mes = "Music"
+                type_mes = TYPE_MUSIC
             else:
-                type_mes = "VoiceMessage"
+                type_mes = TYPE_VOICE_MES
         elif isinstance(message.media.document.attributes[0], DocumentAttributeImageSize):
             target = message.media.document.attributes
             if type(target[1]) == DocumentAttributeSticker:
-                type_mes = 'Sticker'
+                type_mes = TYPE_STICKER
             elif type(target[1]) == DocumentAttributeFilename:
-                type_mes = 'PhotoFile'
+                type_mes = TYPE_PHOTO_FILE
         elif isinstance(message.media.document.attributes[0], DocumentAttributeFilename):
             if message.media.document.mime_type == 'application/pdf':
-                type_mes = 'PDF'
+                type_mes = TYPE_PDF
             elif message.media.document.thumbs is not None:
-                type_mes = 'VideoFile'
+                type_mes = TYPE_VIDEO_FILE
             else:
-                type_mes = 'File'
-    elif message.text != 'Text':
-        type_mes = 'Text'
+                type_mes = TYPE_FILE
+    elif message.text != '':
+        type_mes = TYPE_TEXT
     else:
-        type_mes = 'ErrorTypeFile'
+        type_mes = TYPE_ERROR_FILE
     return type_mes
 
 async def new_chat(client, chat_id):
@@ -190,7 +190,5 @@ def log_message_add(id_, conf):  # add message configuration in db chat
         db.transactions(CREATE_CHAT_LOG.format(id_))
     db.defender_transaction(ADD_CHAT_MESSAGE.format(id_), *conf)
 
-
 async def new_message_event(event, client):
     await add_message(client, event.message, event.chat_id)
-
