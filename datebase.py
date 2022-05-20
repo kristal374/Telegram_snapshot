@@ -11,6 +11,13 @@ class DataBase:
         self.transactions(const.CHANNEL_DB)
         self.transactions(const.CREATE_AUTHOR)
 
+    def cursor_transactions(self, requests):
+        cursor = self.db.cursor()
+        cursor.execute(requests)
+        self.db.commit()
+        return cursor
+
+
     def transactions(self, requests):
         self.cursor.execute(requests)
         self.db.commit()
