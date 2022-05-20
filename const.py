@@ -1,5 +1,3 @@
-LOAD_FILE = {'File': False, 'Video': False, 'Photo': False}
-
 TYPE_PHOTO = 'Photo'
 TYPE_LINK = 'Link'
 TYPE_PHONE_CALL = 'PhoneCall'
@@ -17,6 +15,17 @@ TYPE_VIDEO_FILE = 'VideoFile'
 TYPE_FILE = 'File'
 TYPE_TEXT = 'Text'
 TYPE_ERROR_FILE = 'ErrorTypeFile'
+
+LOAD_FILE = {TYPE_PHOTO: True,
+             TYPE_CIRCULAR_VIDEO: True,
+             TYPE_VIDEO: True,
+             TYPE_MUSIC: True,
+             TYPE_VOICE_MES: True,
+             TYPE_PHOTO_FILE: True,
+             TYPE_VIDEO_FILE: True,
+             TYPE_PDF: True,
+             TYPE_FILE: True
+             }
 
 DB_NAME = 'Telegram.db'
 COLUMN = ["id", "chat_id", "name", "class", "phone", "tag", "status", "active"]

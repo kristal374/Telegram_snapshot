@@ -163,21 +163,28 @@ async def new_chat(client, chat_id):
             return
     return
 
-async def get_text(client, message):
+async def get_audio_text(client, message):
     buf = io.BytesIO()
     await client.download_media(message=message, file=buf)
     buf.seek(0)
     return AudioDownloader.audio_to_text(buf)
 
+async def load_media_message(client, message, type_):
+    if LOAD_FILE.get(type_):
+        buf = io.BytesIO()
+        await client.download_media(message=message, file=buf)
+        buf.seek(0)
+        return buf.read()
+
 async def config_message(client, message):  # config message
     message_id = message.id
     author, author_id, real_author, real_author_id = await get_member(message, client)
     type_ = await type_message(message)
-    text_message = message.text if type_ != 'VoiceMessage' else await get_text(client, message)
+    text_message = message.text if type_ != TYPE_VOICE_MES else await get_audio_text(client, message)
     text_message = text_message if text_message != '' else None
     date = time.mktime(message.date.astimezone(zone).timetuple())
     id_stack = message.grouped_id
-    message = LOAD_FILE.get(type_)
+    message = await load_media_message(client, message, type_)
     note = (message_id, author, author_id, real_author, real_author_id, text_message, message, date, id_stack, type_, 0, 0, None)
     return note
 
