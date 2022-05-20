@@ -3,6 +3,7 @@ TYPE_LINK = 'Link'
 TYPE_PHONE_CALL = 'PhoneCall'
 TYPE_GEO = 'GeoPosition'
 TYPE_CONTACT = 'Contact'
+TYPE_Poll = 'Poll'
 TYPE_CIRCULAR_VIDEO = "CircularVideo"
 TYPE_VIDEO = 'Video'
 TYPE_GIF = "GIF"
@@ -14,17 +15,18 @@ TYPE_PDF = 'PDF'
 TYPE_VIDEO_FILE = 'VideoFile'
 TYPE_FILE = 'File'
 TYPE_TEXT = 'Text'
-TYPE_ERROR_FILE = 'ErrorTypeFile'
+TYPE_UNSUPPORTED = 'MessageMediaUnsupported'
+TYPE_ERROR_MESSAGE = 'ErrorTypeFile'
 
 LOAD_FILE = {TYPE_PHOTO: True,
-             TYPE_CIRCULAR_VIDEO: True,
-             TYPE_VIDEO: True,
+             TYPE_CIRCULAR_VIDEO: False,
+             TYPE_VIDEO: False,
              TYPE_MUSIC: True,
              TYPE_VOICE_MES: True,
              TYPE_PHOTO_FILE: True,
-             TYPE_VIDEO_FILE: True,
-             TYPE_PDF: True,
-             TYPE_FILE: True
+             TYPE_VIDEO_FILE: False,
+             TYPE_PDF: False,
+             TYPE_FILE: False
              }
 
 DB_NAME = 'Telegram.db'

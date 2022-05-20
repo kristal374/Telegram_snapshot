@@ -1,6 +1,6 @@
 from telethon.tl.types import DocumentAttributeAudio, DocumentAttributeImageSize, DocumentAttributeFilename, \
     DocumentAttributeSticker, MessageMediaContact, MessageMediaWebPage, MessageActionPhoneCall, MessageMediaPhoto, \
-    MessageMediaDocument, MessageMediaGeo
+    MessageMediaDocument, MessageMediaGeo, MessageMediaPoll, MessageMediaUnsupported
 from datebase import DataBase
 from const import *
 from pytz import timezone
@@ -44,7 +44,14 @@ async def chat_update(client):
             db.transactions(UPDATE_STATUS.format(id_[0]))
 
 async def update_chat_log(client):
-    pass
+    async for dialog in client.iter_dialogs():
+        chat = dialog.id
+        res = exist_chat(chat)
+        if res is None:
+            await new_chat(client, chat)
+        elif not res[1]:
+            continue
+        await all_message(client, chat)
 
 async def all_message(client, chat):
     id_ = exist_chat(chat)[0]
@@ -75,7 +82,7 @@ async def add_message(client, message, chat, config=None):
     if res is None:
         await new_chat(client, chat)
         res = exist_chat(chat)
-    elif res is not None and not res[1]:
+    elif not res[1]:
         return
     id_ = res[0]
     configure = await config_message(client, message) if not config else config
@@ -110,7 +117,9 @@ async def get_member(message, client):
         if real_sender_id is None:
             real_sender_name = message.forward.from_name
     real_sender_name = real_sender_name if real_sender_name else await get_name(real_sender_id)
-    return await get_name(sender_id), sender_id, real_sender_name, real_sender_id
+    real_author = await get_name(sender_id) if sender_id else 'UnknownMember'
+    real_author_id = sender_id if sender_id else 'UnknownID'
+    return real_author, real_author_id, real_sender_name, real_sender_id
 
 async def type_message(message):
     type_mes = None
@@ -124,6 +133,10 @@ async def type_message(message):
         type_mes = TYPE_GEO
     elif isinstance(message.media, MessageMediaContact):
         type_mes = TYPE_CONTACT
+    elif isinstance(message.media, MessageMediaPoll):
+        type_mes = TYPE_Poll
+    elif isinstance(message.media, MessageMediaUnsupported):
+        type_mes = TYPE_UNSUPPORTED
     elif isinstance(message.media, MessageMediaDocument) and message.video is not None:  # video
         if message.video.attributes[0].round_message is True:
             type_mes = TYPE_CIRCULAR_VIDEO
@@ -150,10 +163,10 @@ async def type_message(message):
                 type_mes = TYPE_VIDEO_FILE
             else:
                 type_mes = TYPE_FILE
-    elif message.text != '':
+    elif message.text:
         type_mes = TYPE_TEXT
     else:
-        type_mes = TYPE_ERROR_FILE
+        type_mes = TYPE_ERROR_MESSAGE
     return type_mes
 
 async def new_chat(client, chat_id):
@@ -188,8 +201,10 @@ def extension(message, type_):
 
 async def config_message(client, message):  # config message
     message_id = message.id
-    author, author_id, real_author, real_author_id = await get_member(message, client)
     type_ = await type_message(message)
+    if type_ == TYPE_ERROR_MESSAGE:
+        return message_id, 'Telegram', 'Telegram', None, None, 'System message', None, None, time.mktime(message.date.astimezone(zone).timetuple()), None, type_, 0, 0, None
+    author, author_id, real_author, real_author_id = await get_member(message, client)
     text_message = message.text if type_ != TYPE_VOICE_MES else await get_audio_text(client, message)
     text_message = text_message if text_message != '' else None
     message_extension = extension(message, type_)
