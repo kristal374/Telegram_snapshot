@@ -54,6 +54,7 @@ real_author TEXT,
 real_author_id TEXT,
 text_message TEXT,
 message BLOB,
+message_extension TEXT,
 time TIME NOT NULL,
 id_stack INTEGER,
 type TEXT NOT NULL,
@@ -61,8 +62,8 @@ redacted INTEGER NOT NULL,
 deleted INTEGER NOT NULL,
 redacted_message TEXT);"""
 ADD_CHAT_MESSAGE = """
-INSERT INTO chat_log_{}(message_id, author, author_id, real_author, real_author_id, text_message, message, time, id_stack, type, redacted, deleted, redacted_message) 
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"""
+INSERT INTO chat_log_{}(message_id, author, author_id, real_author, real_author_id, text_message, message, message_extension, time, id_stack, type, redacted, deleted, redacted_message) 
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"""
 CREATE_AUTHOR = """
 CREATE TABLE IF NOT EXISTS author(
 id INTEGER PRIMARY KEY AUTOINCREMENT,

@@ -176,16 +176,27 @@ async def load_media_message(client, message, type_):
         buf.seek(0)
         return buf.read()
 
+def extension(message, type_):
+    if type_ == TYPE_PHOTO:
+        return 'photo/jpg'
+    elif message.file:
+        try:
+            return message.media.document.mime_type
+        except AttributeError:
+            return
+    return
+
 async def config_message(client, message):  # config message
     message_id = message.id
     author, author_id, real_author, real_author_id = await get_member(message, client)
     type_ = await type_message(message)
     text_message = message.text if type_ != TYPE_VOICE_MES else await get_audio_text(client, message)
     text_message = text_message if text_message != '' else None
+    message_extension = extension(message, type_)
     date = time.mktime(message.date.astimezone(zone).timetuple())
     id_stack = message.grouped_id
     message = await load_media_message(client, message, type_)
-    note = (message_id, author, author_id, real_author, real_author_id, text_message, message, date, id_stack, type_, 0, 0, None)
+    note = (message_id, author, author_id, real_author, real_author_id, text_message, message, message_extension, date, id_stack, type_, 0, 0, None)
     return note
 
 def exist_chat(chat_id):  # test on life log_chat
