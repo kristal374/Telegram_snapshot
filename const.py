@@ -20,6 +20,7 @@ UPDATE_STATUS = "UPDATE chat SET status=0 WHERE chat_id = {}"
 CREATE_CHAT_LOG = """
 CREATE TABLE IF NOT EXISTS chat_log_{}(
 id INTEGER PRIMARY KEY AUTOINCREMENT,
+message_id INTEGER UNIQUE NOT NULL,
 author TEXT NOT NULL,
 author_id INTEGER NOT NULL,
 real_author TEXT,
@@ -29,10 +30,12 @@ message BLOB,
 time TIME NOT NULL,
 id_stack INTEGER,
 type TEXT NOT NULL,
-deleted INTEGER NOT NULL);"""
+redacted INTEGER NOT NULL,
+deleted INTEGER NOT NULL,
+redacted_message TEXT);"""
 ADD_CHAT_MESSAGE = """
-INSERT INTO chat_log_{}(author, author_id, real_author, real_author_id, text_message, message, time, id_stack, type, deleted) 
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"""
+INSERT INTO chat_log_{}(message_id, author, author_id, real_author, real_author_id, text_message, message, time, id_stack, type, redacted, deleted, redacted_message) 
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"""
 CREATE_AUTHOR = """
 CREATE TABLE IF NOT EXISTS author(
 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -44,3 +47,6 @@ ADD_AUTHOR = "INSERT INTO author(name, author_id, class) VALUES (?, ?, ?)"
 SELECT_AUTHOR = "SELECT name FROM author WHERE author_id={};"
 DETECTED = "SELECT id, active FROM chat WHERE chat_id={}"
 SEARCH_TABLE = "SELECT * FROM sqlite_master WHERE  name='chat_log_{}';"
+MESSAGE_DELETE = "UPDATE chat_log_{} SET deleted=1 WHERE id = {}"
+MESSAGE_UPDATE = "UPDATE chat_log_{} SET redacted=1, redacted_message='{}' WHERE id = {}"
+ALL_MESSAGE = "SELECT id, message_id, text_message, type FROM chat_log_{}"
