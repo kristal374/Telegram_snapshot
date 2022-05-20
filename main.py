@@ -23,7 +23,7 @@ client = authorization()
 
 @client.on(events.NewMessage())
 async def normal_handler(event):
-    await new_message(event, client)
+    await new_message_event(event, client)
 
 if __name__ == '__main__':
 
