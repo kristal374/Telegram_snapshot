@@ -21,13 +21,12 @@ async def loop():
     await update_chat_log(client)
 client = authorization()
 
-# @client.on(events.NewMessage())
+@client.on(events.NewMessage(func=lambda e: e.chat_id not in indexed_chats))
 async def normal_handler(event):
     await new_message_event(event, client)
 
 
 if __name__ == '__main__':
-
     with client:
         client.loop.run_until_complete(loop())
-        # client.run_until_disconnected()
+        client.run_until_disconnected()

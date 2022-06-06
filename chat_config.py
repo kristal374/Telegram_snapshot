@@ -10,6 +10,9 @@ import AudioDownloader
 
 zone = timezone('Europe/Kiev')
 db = DataBase(name=DB_NAME)
+db.transactions(TARGET_CHAT)
+indexed_chats = [id_[0] for id_ in db.cursor]
+
 
 def info(dialog):
     chat_id = dialog.id
@@ -25,6 +28,7 @@ def info(dialog):
     status = 1
     active = 1 if class_ is not "channel" else 0
     return chat_id, name, class_, phone, teg, status, active
+
 
 async def chat_update(client):
     channel_id = []
@@ -43,6 +47,7 @@ async def chat_update(client):
         if id_[0] not in channel_id:
             db.transactions(UPDATE_STATUS.format(id_[0]))
 
+
 async def update_chat_log(client):
     async for dialog in client.iter_dialogs():
         chat = dialog.id
@@ -52,6 +57,9 @@ async def update_chat_log(client):
         elif not res[1]:
             continue
         await all_message(client, chat)
+        if chat in indexed_chats:
+            indexed_chats.remove(chat)
+
 
 async def all_message(client, chat):
     id_ = exist_chat(chat)[0]
@@ -77,6 +85,7 @@ async def all_message(client, chat):
             id_bd, *_ = row
             db.transactions(MESSAGE_DELETE.format(id_, id_bd))
 
+
 async def add_message(client, message, chat, config=None):
     res = exist_chat(chat)
     if res is None:
@@ -87,6 +96,7 @@ async def add_message(client, message, chat, config=None):
     id_ = res[0]
     configure = await config_message(client, message) if not config else config
     log_message_add(id_, configure)
+
 
 async def get_member(message, client):
     async def get_name(ID):
@@ -120,6 +130,7 @@ async def get_member(message, client):
     real_author = await get_name(sender_id) if sender_id else 'UnknownMember'
     real_author_id = sender_id if sender_id else 'UnknownID'
     return real_author, real_author_id, real_sender_name, real_sender_id
+
 
 async def type_message(message):
     type_mes = None
@@ -171,6 +182,7 @@ async def type_message(message):
         type_mes = TYPE_ERROR_MESSAGE
     return type_mes
 
+
 async def new_chat(client, chat_id):
     async for dialog in client.iter_dialogs():
         if dialog.id == chat_id:
@@ -178,11 +190,13 @@ async def new_chat(client, chat_id):
             return
     return
 
+
 async def get_audio_text(client, message):
     buf = io.BytesIO()
     await client.download_media(message=message, file=buf)
     buf.seek(0)
     return AudioDownloader.audio_to_text(buf)
+
 
 async def load_media_message(client, message, type_):
     if LOAD_FILE.get(type_):
@@ -190,6 +204,7 @@ async def load_media_message(client, message, type_):
         await client.download_media(message=message, file=buf)
         buf.seek(0)
         return buf.read()
+
 
 def extension(message, type_):
     if type_ == TYPE_PHOTO:
@@ -201,11 +216,13 @@ def extension(message, type_):
             return
     return
 
+
 async def config_message(client, message):  # config message
     message_id = message.id
     type_ = await type_message(message)
     if type_ == TYPE_ERROR_MESSAGE:
-        return message_id, 'Telegram', 'Telegram', None, None, 'System message', None, None, time.mktime(message.date.astimezone(zone).timetuple()), None, type_, 0, 0, None
+        return message_id, 'Telegram', 'Telegram', None, None, 'System message', None, None, time.mktime(
+            message.date.astimezone(zone).timetuple()), None, type_, 0, 0, None
     author, author_id, real_author, real_author_id = await get_member(message, client)
     text_message = message.text if type_ != TYPE_VOICE_MES else await get_audio_text(client, message)
     text_message = text_message if text_message != '' else None
@@ -213,17 +230,21 @@ async def config_message(client, message):  # config message
     date = time.mktime(message.date.astimezone(zone).timetuple())
     id_stack = message.grouped_id
     message = await load_media_message(client, message, type_)
-    note = (message_id, author, author_id, real_author, real_author_id, text_message, message, message_extension, date, id_stack, type_, 0, 0, None)
+    note = (message_id, author, author_id, real_author, real_author_id, text_message, message, message_extension, date,
+            id_stack, type_, 0, 0, None)
     return note
+
 
 def exist_chat(chat_id):  # test on life log_chat
     db.transactions(DETECTED.format(chat_id))
     return db.cursor.fetchone()
 
+
 def log_message_add(id_, conf):  # add message configuration in db chat
     if not exist_chat(id_):
         db.transactions(CREATE_CHAT_LOG.format(id_))
     db.defender_transaction(ADD_CHAT_MESSAGE.format(id_), *conf)
+
 
 async def new_message_event(event, client):
     await add_message(client, event.message, event.chat_id)

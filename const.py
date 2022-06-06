@@ -20,18 +20,18 @@ TYPE_UNSUPPORTED = 'MessageMediaUnsupported'
 TYPE_ERROR_MESSAGE = 'ErrorTypeFile'
 
 LOAD_FILE = {TYPE_PHOTO: True,
-             TYPE_CIRCULAR_VIDEO: False,
-             TYPE_VIDEO: False,
+             TYPE_CIRCULAR_VIDEO: True,
+             TYPE_VIDEO: True,
              TYPE_MUSIC: True,
              TYPE_VOICE_MES: True,
              TYPE_PHOTO_FILE: True,
-             TYPE_VIDEO_FILE: False,
-             TYPE_PDF: False,
-             TYPE_FILE: False
+             TYPE_VIDEO_FILE: True,
+             TYPE_PDF: True,
+             TYPE_FILE: True
              }
 
 DB_NAME = 'Telegram.db'
-COLUMN = ["id", "chat_id", "name", "class", "phone", "tag", "status", "active"]
+TARGET_CHAT = "SELECT chat_id FROM chat"
 ENTRY_CHECK = "SELECT * FROM chat WHERE chat_id = {}"
 ADD_NOTE_CHAT = "INSERT INTO chat(chat_id, name, class, phone, tag, status, active) VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT DO NOTHING;"
 CHANNEL_DB = """
@@ -66,7 +66,7 @@ deleted INTEGER NOT NULL,
 redacted_message TEXT);"""
 ADD_CHAT_MESSAGE = """
 INSERT INTO chat_log_{}(message_id, author, author_id, real_author, real_author_id, text_message, message, message_extension, time, id_stack, type, redacted, deleted, redacted_message) 
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"""
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)  ON CONFLICT DO NOTHING;"""
 CREATE_AUTHOR = """
 CREATE TABLE IF NOT EXISTS author(
 id INTEGER PRIMARY KEY AUTOINCREMENT,
