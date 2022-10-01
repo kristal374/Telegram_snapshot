@@ -1,5 +1,5 @@
 from peewee import *
-from const import *
+from src.module.const import *
 
 db = SqliteDatabase(DB_NAME)
 
