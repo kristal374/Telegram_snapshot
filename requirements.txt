@@ -2,3 +2,5 @@ peewee
 pydub
 speechRecognition
 vosk
+Telethon
+python-dotenv
