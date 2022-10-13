@@ -73,6 +73,8 @@ class Author(BaseModel):
     name = TextField(null=True)
     author_id = IntegerField(unique=True)
     category = CharField(max_length=7, column_name="class")
+    phone = IntegerField(null=True)
+    tag = TextField(null=True)
 
 
 class Version(Model):
