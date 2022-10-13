@@ -47,9 +47,10 @@ class Chat(BaseModel):
     phone = IntegerField(null=True)
     tag = CharField(max_length=32, null=True)
     photo = BlobField(null=True)
-    bio = TextField()
+    bio = TextField(null=True)
     status = BooleanField()
     active = BooleanField()
+    date_create = DateTimeField(null=True)
 
 
 class ChatHistory(BaseModel):
@@ -59,10 +60,10 @@ class ChatHistory(BaseModel):
     phone = IntegerField(null=True)
     tag = CharField(max_length=32, null=True)
     photo = BlobField(null=True)
-    bio = TextField()
+    bio = TextField(null=True)
     status = BooleanField()
     active = BooleanField()
-    date_edit = DateTimeField()
+    date_edit = DateTimeField(null=True)
 
     class Meta:
         db_table = "change_history_preview"

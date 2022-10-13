@@ -13,6 +13,9 @@ async def update():
 
 
 async def configuration_chats():
+    tm = time.clock()
     async for dialog in Global.client.iter_dialogs():
-        await get_chat_info(dialog)
-
+        requests.add_new_chat(await get_chat_info(dialog))
+        async for message in Global.client.iter_messages(dialog.id, reverse=True):
+            requests.add_new_message(await get_message_info(message))
+    print(time.clock()-tm)
