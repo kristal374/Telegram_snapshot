@@ -1,8 +1,11 @@
+from pytz import timezone
+
 
 class Global:
     client = None  # Главный экземпляр Telegram API
     setup = None  # Главный экземпляр настроек
     db = None
+    zone = timezone('Europe/Kiev')
 
 
 class Setup:
