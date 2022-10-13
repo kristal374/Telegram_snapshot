@@ -1,14 +1,15 @@
 from peewee import *
 from src.module.const import *
+from src.settings import Global
 
-db = SqliteDatabase(DB_NAME)
+Global.db = SqliteDatabase(DB_NAME)
 
 
 class BaseModel(Model):
     id = AutoField(primary_key=True, null=False)
 
     class Meta:
-        database = db
+        database = Global.db
         order_by = "id"
 
     def __str__(self):
@@ -33,6 +34,8 @@ class Message(BaseModel):
 
 
 class EditMessage(Message):
+    date_edit = DateTimeField()
+
     class Meta:
         db_table = "edit_message"
 
@@ -44,6 +47,7 @@ class Chat(BaseModel):
     phone = IntegerField(null=True)
     tag = CharField(max_length=32, null=True)
     photo = BlobField(null=True)
+    bio = TextField()
     status = BooleanField()
     active = BooleanField()
 
@@ -55,8 +59,10 @@ class ChatHistory(BaseModel):
     phone = IntegerField(null=True)
     tag = CharField(max_length=32, null=True)
     photo = BlobField(null=True)
+    bio = TextField()
     status = BooleanField()
     active = BooleanField()
+    date_edit = DateTimeField()
 
     class Meta:
         db_table = "change_history_preview"
@@ -68,11 +74,8 @@ class Author(BaseModel):
     category = CharField(max_length=7, column_name="class")
 
 
-def main():
-    db.connect()
-    with db:
-        db.create_tables([Message, EditMessage, Chat, ChatHistory, Author])
+class Version(Model):
+    version = IntegerField()
 
-
-if __name__ == '__main__':
-    main()
+    class Meta:
+        database = Global.db
