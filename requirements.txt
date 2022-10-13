@@ -4,3 +4,4 @@ speechRecognition
 vosk
 Telethon
 python-dotenv
+pytz
