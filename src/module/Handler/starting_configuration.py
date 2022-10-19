@@ -1,7 +1,6 @@
 from ..Data_base_handler import *
 from src.settings import Global
 from .manager import *
-import time
 
 
 async def update():
@@ -13,9 +12,11 @@ async def update():
 
 
 async def configuration_chats():
-    tm = time.clock()
     async for dialog in Global.client.iter_dialogs():
         requests.add_new_chat(await get_chat_info(dialog))
-        async for message in Global.client.iter_messages(dialog.id, reverse=True):
-            requests.add_new_message(await get_message_info(message))
-    print(time.clock()-tm)
+        if requests.is_active(dialog.id).active:
+            async for message in Global.client.iter_messages(dialog.id, reverse=True):
+                requests.add_new_message(await get_message_info(message))
+            Global.listen_chats.append(dialog.id)
+        else:
+            Global.listen_chats.clear()

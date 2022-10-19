@@ -1,2 +1,1 @@
-import audio_format_converter
-import translator
+from . import audio_format_converter, translator

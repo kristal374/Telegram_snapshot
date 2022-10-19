@@ -1,5 +1,5 @@
 import speech_recognition as sr
-from audio_format_converter import convert_from_ogg
+from .audio_format_converter import convert_from_ogg
 from vosk import Model, KaldiRecognizer, SetLogLevel
 import json
 import wave
@@ -19,10 +19,7 @@ class InterfaceConverter:
 
         with sample_audio as audio_file:
             self.recognizer.adjust_for_ambient_noise(audio_file)
-            with open("test_audio.wav", 'wb') as f:
-                f.write(audio_file.filename_or_fileobject.read())
             audio_content = self.recognizer.record(audio_file)
-
         return audio_content
 
     def convert_in_text(self, lang="ru"):
@@ -58,10 +55,6 @@ class MyModelRecognize(InterfaceConverter):
         return json.loads(self.recognizer.FinalResult())
 
 
-def audio_to_text(file, lang="ru"):
-    recognizer = MyModelRecognize(file)
+def audio_to_text(model, file, lang="ru"):
+    recognizer = model(file)
     return recognizer.convert_in_text(lang)
-
-
-if __name__ == '__main__':
-    audio_to_text(r"D:\PycharmProjects\Telegram_snapshot\mother.ogg")

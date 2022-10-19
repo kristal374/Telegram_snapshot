@@ -4,20 +4,20 @@ from dotenv import load_dotenv
 from telethon import TelegramClient, events
 
 from module.Handler import *
-from src.settings import Global, Setup
+from src.settings import Global, Setup, VoiceSetup
 
-# func=lambda e: e.chat_id not in indexed_chats
 load_dotenv()
 
 API_ID = int(os.getenv('api_id'))
 API_HASH = os.getenv('api_hash')
 
 Global.client = TelegramClient('Alex', API_ID, API_HASH)
-Global.setup = Setup(True, True, True, True, True, True, True, True, True)
+Global.setup = Setup()  # True, True, True, True, True, True, True, True
+Global.transcribe = VoiceSetup(True)
 
 
 # TODO Реализовать обработку новых сообщений
-@Global.client.on(events.NewMessage(func=None))
+@Global.client.on(events.NewMessage(func=lambda e: e.chat_id in Global.listen_chats or len(Global.listen_chats) == 0))
 async def new_message_handler(event):
     """Событие нового сообщения"""
 
@@ -25,28 +25,30 @@ async def new_message_handler(event):
 
 
 # TODO Реализовать обработку прочитанных сообщений
-@Global.client.on(events.MessageRead(func=None))
+@Global.client.on(events.MessageRead(func=lambda e: e.chat_id in Global.listen_chats or len(Global.listen_chats) == 0))
 async def read_handler(event):
     """Событие чтения сообщения"""
     read_massge.main(Global.client, event)
 
 
 # TODO Реализовать редактирование сообщений
-@Global.client.on(events.MessageEdited(func=None))
+@Global.client.on(
+    events.MessageEdited(func=lambda e: e.chat_id in Global.listen_chats or len(Global.listen_chats) == 0))
 async def edit_handler(event):
     """Событие редактирование сообщения"""
     edit_message.main(Global.client, event)
 
 
 # TODO Реализовать удаление сообщений
-@Global.client.on(events.MessageDeleted(func=None))
+@Global.client.on(
+    events.MessageDeleted(func=lambda e: e.chat_id in Global.listen_chats or len(Global.listen_chats) == 0))
 async def delete_handler(event):
     """Событие удаление сообщения"""
     delete_message.main(Global.client, event)
 
 
 # TODO Реализовать обработчик событий чата
-@Global.client.on(events.ChatAction(func=None))
+@Global.client.on(events.ChatAction(func=lambda e: e.chat_id in Global.listen_chats or len(Global.listen_chats) == 0))
 async def chat_handler(event):
     """События чата"""
     if event.action_message:
@@ -79,7 +81,7 @@ async def chat_handler(event):
 
 
 # TODO Реализовать обработку событий пользователя
-@Global.client.on(events.UserUpdate(func=None))
+@Global.client.on(events.UserUpdate(func=lambda e: e.chat_id in Global.listen_chats or len(Global.listen_chats) == 0))
 async def user_handler(event):
     """События пользователя"""
     user_event.main(Global.client, event)

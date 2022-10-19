@@ -17,20 +17,20 @@ class BaseModel(Model):
 
 
 class Message(BaseModel):
-    chat_id = IntegerField(unique=True)
-    message_id = IntegerField(unique=True)
-    author = TextField()
+    chat_id = IntegerField()
+    message_id = IntegerField(unique=False)
     author_id = IntegerField()
     real_author = TextField(null=True)
     real_author_id = IntegerField(null=True)
     text_message = TextField(null=True)
+    reply = IntegerField(null=True)
     message = BlobField(null=True)
-    message_extension = TextField(null=True)
+    extension = TextField(null=True)
     time = DateTimeField()
     id_stack = IntegerField(null=True)
     type = TextField()
     redacted = BooleanField()
-    deleted = BooleanField()
+    deleted = DateTimeField(null=True)
 
 
 class EditMessage(Message):
