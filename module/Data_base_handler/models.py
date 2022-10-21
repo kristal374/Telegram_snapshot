@@ -1,6 +1,6 @@
 from peewee import *
-from src.module.const import *
-from src.settings import Global
+from module.const import *
+from module.settings import Global
 
 Global.db = SqliteDatabase(DB_NAME)
 

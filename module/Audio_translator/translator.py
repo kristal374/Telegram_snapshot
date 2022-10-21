@@ -3,7 +3,7 @@ from .audio_format_converter import convert_from_ogg
 from vosk import Model, KaldiRecognizer, SetLogLevel
 import json
 import wave
-from src.module.const import *
+from module.const import *
 
 SetLogLevel(-1)
 

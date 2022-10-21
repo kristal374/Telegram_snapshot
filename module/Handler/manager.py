@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from src.settings import Global, MessageType, MessageEvent
+from module.settings import Global, MessageType, MessageEvent
 from telethon.tl.functions import channels, users, messages
 from telethon.tl.types import User, Channel, Chat,\
     MessageMediaPhoto, MessageMediaWebPage, MessageActionPhoneCall, MessageMediaGeo,\
