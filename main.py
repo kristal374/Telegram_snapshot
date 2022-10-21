@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from telethon import TelegramClient, events
 
 from module.Handler import *
-from src.settings import Global, Setup, VoiceSetup
+from module.settings import Global, Setup, VoiceSetup
 
 load_dotenv()
 
@@ -87,7 +87,7 @@ async def user_handler(event):
     user_event.main(Global.client, event)
 
 
-# TODO  Реализовать изначальную настройку клиента
+# TODO Реализовать изначальную настройку клиента
 async def main():
     await starting_configuration.update()
 

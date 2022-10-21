@@ -1,5 +1,5 @@
 from pytz import timezone
-from src.module.Audio_translator.translator import *
+from module.Audio_translator.translator import *
 
 
 class Global:

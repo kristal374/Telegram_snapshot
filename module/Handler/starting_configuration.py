@@ -1,5 +1,3 @@
-from ..Data_base_handler import *
-from src.settings import Global
 from .manager import *
 
 
